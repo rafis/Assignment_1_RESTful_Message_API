@@ -36,6 +36,9 @@ class MessageController extends ScalatraServlet with JacksonJsonSupport {
      */
     get("/:id") {
         val id: Int = params.getAs[Int]("id").getOrElse(halt(BadRequest("Please provide an message ID")))
+        if ( ! messages.isDefinedAt(id)) {
+            halt(NotFound(s"Message with id=${id} does not exists"))
+        }
         messages(id)
     }
 
@@ -46,7 +49,7 @@ class MessageController extends ScalatraServlet with JacksonJsonSupport {
     post("/") {
         val message: Message = parsedBody.extract[Message]
         if (messages.isDefinedAt(message.id)) {
-            halt(BadRequest(s"Message with id=${message.id} already exists"))
+            halt(Conflict(s"Message with id=${message.id} already exists"))
         }
         messages += (message.id -> message)
         message
@@ -59,7 +62,7 @@ class MessageController extends ScalatraServlet with JacksonJsonSupport {
     put("/:id") {
         val id: Int = params.getAs[Int]("id").getOrElse(halt(BadRequest("Please provide an message ID")))
         if ( ! messages.isDefinedAt(id)) {
-            throw new Exception(s"Message with id=${id} does not exists")
+            halt(NotFound(s"Message with id=${id} does not exists"))
         }
         val message = messages(id)
         val updatedMessage = message.copy(text = parsedBody.extract[MessageUpdate].text)
@@ -74,7 +77,7 @@ class MessageController extends ScalatraServlet with JacksonJsonSupport {
     delete("/:id") {
         val id: Int = params.getAs[Int]("id").getOrElse(halt(BadRequest("Please provide an message ID")))
         if ( ! messages.isDefinedAt(id)) {
-            throw new Exception(s"Message with id=${id} does not exists")
+            halt(NotFound(s"Message with id=${id} does not exists"))
         }
         messages -= id
         NoContent()

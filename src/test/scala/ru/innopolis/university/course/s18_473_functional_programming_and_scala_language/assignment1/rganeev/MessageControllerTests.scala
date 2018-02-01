@@ -20,6 +20,13 @@ class MessageControllerTests extends ScalatraFunSuite {
         }
     }
 
+    test("POST /messages/ on MessageController second time should generate a validation error") {
+        postJson("/messages/", JObject(List("id" -> JInt(1), "text" -> JString("Test text")))) {
+            status should be >= 400
+            status should be < 500
+        }
+    }
+
     test("GET /message/ on MessageController should return list of messages including recently created message") {
         get("/messages/") {
             status should equal (200)
@@ -40,9 +47,21 @@ class MessageControllerTests extends ScalatraFunSuite {
         }
     }
 
+    test("GET /messages/999 on MessageController should generate a Not Found error") {
+        get("/messages/999") {
+            status should equal (404)
+        }
+    }
+
     test("PUT /messages/1 on MessageController should update the text of the message") {
         putJson("/messages/1", JObject(List("text" -> JString("Some new text")))) {
             status should equal (200)
+        }
+    }
+
+    test("PUT /messages/999 on MessageController should generate a Not Found error") {
+        putJson("/messages/999", JObject(List("text" -> JString("Some new text")))) {
+            status should equal (404)
         }
     }
 
