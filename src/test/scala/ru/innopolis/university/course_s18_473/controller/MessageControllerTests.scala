@@ -1,12 +1,19 @@
-package ru.innopolis.university.course.s18_473_functional_programming_and_scala_language.assignment1.rganeev
+package ru.innopolis.university.course_s18_473.controller
 
-import org.scalatra.test.scalatest._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.scalatra.test.scalatest._
+import ru.innopolis.university.course_s18_473.data.{MessageStore, Repository, User, UserStore}
 
 class MessageControllerTests extends ScalatraFunSuite {
 
-    addServlet(classOf[MessageController], "/messages/*")
+    val messageStore = MessageStore()
+    val userStore = UserStore()
+    userStore += (1 -> User(1, "rafis", "1a8c342b4753fe45d2d03c8f24477d722a77c3f1", "Rafis Ganeev", false))
+    userStore += (2 -> User(2, "julio", "1a8c342b4753fe45d2d03c8f24477d722a77c3f1", "Julio Reis", false))
+    userStore += (3 -> User(3, "deepdrumpf", "1a8c342b4753fe45d2d03c8f24477d722a77c3f1", "DeepDrumpf", true))
+    val repository = Repository(messageStore, userStore)
+    addServlet(new MessageController(repository), "/messages/*")
 
     def postJson[A](uri: String, body: JValue, headers: Map[String, String] = Map.empty)(f: => A): A =
         post(uri, compact(render(body)).getBytes("utf-8"), Map("Content-Type" -> "application/json; charset=UTF-8") ++ headers)(f)
